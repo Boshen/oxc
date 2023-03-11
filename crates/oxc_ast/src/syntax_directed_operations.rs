@@ -266,7 +266,7 @@ impl<'a> PrivateBoundIdentifiers for MethodDefinition<'a> {
     fn private_bound_identifiers(&self) -> Option<PrivateIdentifier> {
         self.value.body.as_ref()?;
         if let PropertyKey::PrivateIdentifier(ident) = &self.key {
-            return Some((*ident).clone());
+            return Some((**ident).clone());
         }
         None
     }
@@ -275,7 +275,7 @@ impl<'a> PrivateBoundIdentifiers for MethodDefinition<'a> {
 impl<'a> PrivateBoundIdentifiers for PropertyDefinition<'a> {
     fn private_bound_identifiers(&self) -> Option<PrivateIdentifier> {
         if let PropertyKey::PrivateIdentifier(ident) = &self.key {
-            return Some((*ident).clone());
+            return Some((**ident).clone());
         }
         None
     }
@@ -284,7 +284,7 @@ impl<'a> PrivateBoundIdentifiers for PropertyDefinition<'a> {
 impl<'a> PrivateBoundIdentifiers for AccessorProperty<'a> {
     fn private_bound_identifiers(&self) -> Option<PrivateIdentifier> {
         if let PropertyKey::PrivateIdentifier(ident) = &self.key {
-            return Some((*ident).clone());
+            return Some((**ident).clone());
         }
         None
     }

@@ -373,7 +373,7 @@ impl<'a> TSTypeName<'a> {
     #[must_use]
     pub fn get_first_name(name: &TSTypeName) -> IdentifierName {
         match name {
-            TSTypeName::IdentifierName(name) => (*name).clone(),
+            TSTypeName::IdentifierName(name) => (**name).clone(),
             TSTypeName::QualifiedName(name) => TSTypeName::get_first_name(&name.left),
         }
     }

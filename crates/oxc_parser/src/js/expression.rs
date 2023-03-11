@@ -595,7 +595,7 @@ impl<'a> Parser<'a> {
 
         let mut type_parameter = None;
         if let Expression::TSInstantiationExpression(instantiation_expr) = callee {
-            let instantiation_expr = instantiation_expr.unbox();
+            let instantiation_expr = Box::into_inner(instantiation_expr);
             type_parameter.replace(instantiation_expr.type_parameters);
             callee = instantiation_expr.expression;
         }
@@ -634,7 +634,7 @@ impl<'a> Parser<'a> {
             let optional_call = self.eat(Kind::QuestionDot);
             *in_optional_chain = if optional_call { true } else { *in_optional_chain };
             if let Expression::TSInstantiationExpression(expr) = lhs {
-                let expr = expr.unbox();
+                let expr = Box::into_inner(expr);
                 type_arguments.replace(expr.type_parameters);
                 lhs = expr.expression;
             }

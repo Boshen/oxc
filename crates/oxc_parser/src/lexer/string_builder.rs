@@ -58,7 +58,7 @@ impl<'a> AutoCow<'a> {
 
     pub fn finish(mut self, lexer: &Lexer<'a>) -> &'a str {
         match self.value.take() {
-            Some(s) => s.into_bump_str(),
+            Some(s) => s.leak(),
             None => &self.start[..self.start.len() - lexer.remaining().len()],
         }
     }
@@ -66,7 +66,7 @@ impl<'a> AutoCow<'a> {
     // Just like finish, but without pushing current char.
     pub fn finish_without_push(mut self, lexer: &Lexer<'a>) -> &'a str {
         match self.value.take() {
-            Some(s) => s.into_bump_str(),
+            Some(s) => s.leak(),
             None => &self.start[..self.start.len() - lexer.remaining().len() - 1],
         }
     }

@@ -124,7 +124,7 @@ impl<'a> Parser<'a> {
         let mut first_extends = self.parse_lhs_expression()?;
         let first_type_argument;
         if let Expression::TSInstantiationExpression(expr) = first_extends {
-            let expr = expr.unbox();
+            let expr = Box::into_inner(expr);
             first_extends = expr.expression;
             first_type_argument = Some(expr.type_parameters);
         } else {
@@ -137,7 +137,7 @@ impl<'a> Parser<'a> {
             let mut extend = self.parse_lhs_expression()?;
             let type_argument;
             if let Expression::TSInstantiationExpression(expr) = extend {
-                let expr = expr.unbox();
+                let expr = Box::into_inner(expr);
                 extend = expr.expression;
                 type_argument = Some(expr.type_parameters);
             } else {
@@ -461,7 +461,7 @@ impl<'a> Parser<'a> {
         self.ctx = self.ctx.and_await(true).and_yield(false).and_return(false);
         let block = self.parse_block()?;
         self.ctx = self.ctx.and_await(has_await).and_yield(has_yield).and_return(has_return);
-        Ok(self.ast.static_block(self.end_span(span), block.unbox().body))
+        Ok(self.ast.static_block(self.end_span(span), Box::into_inner(block).body))
     }
 
     /// `https://github.com/tc39/proposal-decorators`

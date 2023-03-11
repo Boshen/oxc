@@ -2,7 +2,7 @@
 
 #![allow(clippy::unused_self, clippy::missing_const_for_fn, clippy::too_many_arguments)]
 
-use oxc_allocator::{Allocator, Box, String, Vec};
+use oxc_allocator::{Allocator, Box, Vec};
 
 #[allow(clippy::wildcard_imports)]
 use crate::{ast::*, Atom, SourceType, Span};
@@ -42,7 +42,7 @@ impl<'a> AstBuilder<'a> {
     #[must_use]
     #[inline]
     pub fn new_str(&self, value: &str) -> &'a str {
-        String::from_str_in(value, self.allocator).into_bump_str()
+        &*self.allocator.alloc_str(value)
     }
 
     #[must_use]
@@ -50,7 +50,7 @@ impl<'a> AstBuilder<'a> {
     pub fn program(
         &self,
         span: Span,
-        directives: Vec<'a, Directive>,
+        directives: Vec<'a, Directive<'a>>,
         body: Vec<'a, Statement<'a>>,
         source_type: SourceType,
     ) -> Program<'a> {
@@ -126,7 +126,7 @@ impl<'a> AstBuilder<'a> {
     #[inline]
     pub fn block_statement(&self, block: Box<'a, BlockStatement<'a>>) -> Statement<'a> {
         Statement::BlockStatement(
-            self.alloc(BlockStatement { span: block.span, body: block.unbox().body }),
+            self.alloc(BlockStatement { span: block.span, body: Box::into_inner(block).body }),
         )
     }
 
@@ -734,7 +734,7 @@ impl<'a> AstBuilder<'a> {
     pub fn function_body(
         &self,
         span: Span,
-        directives: Vec<'a, Directive>,
+        directives: Vec<'a, Directive<'a>>,
         statements: Vec<'a, Statement<'a>>,
     ) -> Box<'a, FunctionBody<'a>> {
         self.alloc(FunctionBody { span, directives, statements })
@@ -1275,12 +1275,11 @@ impl<'a> AstBuilder<'a> {
         &self,
         extends: Vec<'a, (Expression<'a>, Option<Box<'a, TSTypeParameterInstantiation<'a>>>, Span)>,
     ) -> Vec<'a, Box<'a, TSInterfaceHeritage<'a>>> {
-        Vec::from_iter_in(
-            extends.into_iter().map(|(expression, type_parameters, span)| {
-                self.alloc(TSInterfaceHeritage { span, expression, type_parameters })
-            }),
-            self.allocator,
-        )
+        let mut vec = Vec::new_in(self.allocator);
+        vec.extend(extends.into_iter().map(|(expression, type_parameters, span)| {
+            self.alloc(TSInterfaceHeritage { span, expression, type_parameters })
+        }));
+        vec
     }
 
     #[must_use]

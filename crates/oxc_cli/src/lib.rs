@@ -131,7 +131,7 @@ impl Cli {
         let ret = Parser::new(&allocator, &parser_source_text, source_type).parse();
         if !ret.errors.is_empty() {
             return ret.errors;
-        };
+        }
 
         let program = allocator.alloc(ret.program);
         let trivias = Rc::new(ret.trivias);

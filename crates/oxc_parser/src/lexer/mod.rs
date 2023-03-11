@@ -1125,7 +1125,7 @@ impl<'a> Lexer<'a> {
         }
         let mut s = String::from_str_in(prev_str, self.allocator);
         s.push_str(builder.finish(self));
-        self.current.token.value = self.string_to_token_value(s.into_bump_str());
+        self.current.token.value = self.string_to_token_value(s.leak());
         Kind::Ident
     }
 

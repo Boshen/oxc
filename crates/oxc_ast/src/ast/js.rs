@@ -148,9 +148,7 @@ impl<'a> Expression<'a> {
     #[must_use]
     pub fn without_parenthesized(&self) -> &Self {
         match self {
-            Expression::ParenthesizedExpression(Box(expr)) => {
-                expr.expression.without_parenthesized()
-            }
+            Expression::ParenthesizedExpression(expr) => expr.expression.without_parenthesized(),
             _ => self,
         }
     }

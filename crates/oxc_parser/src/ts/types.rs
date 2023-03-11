@@ -974,7 +974,7 @@ impl<'a> Parser<'a> {
             let TSSignature::TSCallSignatureDeclaration(call_signature) = self.parse_ts_call_signature_member()? else { unreachable!() };
             self.bump(Kind::Comma);
             self.bump(Kind::Semicolon);
-            let call_signature = call_signature.unbox();
+            let call_signature = Box::into_inner(call_signature);
             Ok(self.ast.ts_method_signature(
                 self.end_span(span),
                 key,

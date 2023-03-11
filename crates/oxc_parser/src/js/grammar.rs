@@ -1,5 +1,6 @@
 //! Cover Grammar for Destructuring Assignment
 
+use oxc_allocator::Box;
 use oxc_ast::{ast::*, GetSpan};
 use oxc_diagnostics::Result;
 
@@ -13,13 +14,13 @@ impl<'a> CoverGrammar<'a, Expression<'a>> for AssignmentTarget<'a> {
     fn cover(expr: Expression<'a>, p: &mut Parser<'a>) -> Result<Self> {
         match expr {
             Expression::ArrayExpression(array_expr) => {
-                ArrayAssignmentTarget::cover(array_expr.unbox(), p)
+                ArrayAssignmentTarget::cover(Box::into_inner(array_expr), p)
                     .map(|pat| p.ast.alloc(pat))
                     .map(AssignmentTargetPattern::ArrayAssignmentTarget)
                     .map(AssignmentTarget::AssignmentTargetPattern)
             }
             Expression::ObjectExpression(object_expr) => {
-                ObjectAssignmentTarget::cover(object_expr.unbox(), p)
+                ObjectAssignmentTarget::cover(Box::into_inner(object_expr), p)
                     .map(|pat| p.ast.alloc(pat))
                     .map(AssignmentTargetPattern::ObjectAssignmentTarget)
                     .map(AssignmentTarget::AssignmentTargetPattern)
@@ -43,7 +44,7 @@ impl<'a> CoverGrammar<'a, Expression<'a>> for SimpleAssignmentTarget<'a> {
             }
             Expression::ParenthesizedExpression(expr) => {
                 let span = expr.span;
-                match expr.unbox().expression {
+                match Box::into_inner(expr).expression {
                     Expression::ObjectExpression(_) | Expression::ArrayExpression(_) => {
                         Err(diagnostics::InvalidAssignment(span).into())
                     }
@@ -75,7 +76,8 @@ impl<'a> CoverGrammar<'a, ArrayExpression<'a>> for ArrayAssignmentTarget<'a> {
                     }
                     Argument::SpreadElement(elem) => {
                         if i == len - 1 {
-                            rest = Some(AssignmentTarget::cover(elem.unbox().argument, p)?);
+                            rest =
+                                Some(AssignmentTarget::cover(Box::into_inner(elem).argument, p)?);
                             if let Some(span) = expr.trailing_comma {
                                 p.error(diagnostics::RestElementTraillingComma(span));
                             }
@@ -102,7 +104,8 @@ impl<'a> CoverGrammar<'a, Expression<'a>> for AssignmentTargetMaybeDefault<'a> {
     fn cover(expr: Expression<'a>, p: &mut Parser<'a>) -> Result<Self> {
         match expr {
             Expression::AssignmentExpression(assignment_expr) => {
-                let target = AssignmentTargetWithDefault::cover(assignment_expr.unbox(), p)?;
+                let target =
+                    AssignmentTargetWithDefault::cover(Box::into_inner(assignment_expr), p)?;
                 Ok(AssignmentTargetMaybeDefault::AssignmentTargetWithDefault(p.ast.alloc(target)))
             }
             expr => {
@@ -128,12 +131,12 @@ impl<'a> CoverGrammar<'a, ObjectExpression<'a>> for ObjectAssignmentTarget<'a> {
         for (i, elem) in expr.properties.into_iter().enumerate() {
             match elem {
                 ObjectProperty::Property(property) => {
-                    let target = AssignmentTargetProperty::cover(property.unbox(), p)?;
+                    let target = AssignmentTargetProperty::cover(Box::into_inner(property), p)?;
                     properties.push(target);
                 }
                 ObjectProperty::SpreadProperty(spread) => {
                     if i == len - 1 {
-                        rest = Some(AssignmentTarget::cover(spread.unbox().argument, p)?);
+                        rest = Some(AssignmentTarget::cover(Box::into_inner(spread).argument, p)?);
                     } else {
                         return Err(diagnostics::SpreadLastElement(spread.span).into());
                     }
@@ -150,13 +153,13 @@ impl<'a> CoverGrammar<'a, Property<'a>> for AssignmentTargetProperty<'a> {
         if property.shorthand {
             let binding = match property.key {
                 PropertyKey::Identifier(ident) => {
-                    IdentifierReference { span: ident.span, name: ident.unbox().name }
+                    IdentifierReference { span: ident.span, name: Box::into_inner(ident).name }
                 }
                 _ => return p.unexpected(),
             };
             let init = match property.value {
                 PropertyValue::Expression(Expression::AssignmentExpression(assignment_expr)) => {
-                    Some(assignment_expr.unbox().right)
+                    Some(Box::into_inner(assignment_expr).right)
                 }
                 _ => None,
             };

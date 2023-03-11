@@ -10,5 +10,7 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
-bumpalo = { workspace = true, features = ["collections"] }
+bumpalo = { workspace = true }
+blink-alloc = { workspace = true }
+allocator-api2 = { workspace = true }
 serde = { workspace = true }

@@ -53,7 +53,7 @@ impl<'a> Parser<'a> {
                                 let src = &self.source
                                     [string.span.start as usize + 1..string.span.end as usize - 1];
                                 let directive =
-                                    self.ast.directive(expr.span, (*string).clone(), src);
+                                    self.ast.directive(expr.span, (**string).clone(), src);
                                 directives.push(directive);
                                 continue;
                             }
