@@ -13,6 +13,7 @@ mod rules;
 use std::{fs, rc::Rc};
 
 pub use fixer::{Fixer, Message};
+use oxc_ast::GetSpan;
 pub(crate) use oxc_semantic::AstNode;
 use oxc_semantic::Semantic;
 use rule::{Rule, RuleCategory};
@@ -82,8 +83,24 @@ impl Linter {
         fix: bool,
     ) -> Vec<Message<'a>> {
         let ctx = LintContext::new(source_text, semantic.clone(), fix);
+        let trivias = semantic.trivias();
+        let configuration_affected_lines = trivias.configuration_lines(source_text);
+        let nodes = semantic.nodes();
+        let nodes_to_lint = if configuration_affected_lines.is_empty() {
+            nodes.iter().collect()
+        } else {
+            nodes
+                .iter()
+                .filter(|node| {
+                    let span = node.get().kind().span();
+                    !configuration_affected_lines.iter().any(|l| {
+                        trivias.line_numbers(source_text, span.start, span.end).contains(l)
+                    })
+                })
+                .collect::<Vec<_>>()
+        };
 
-        for node in semantic.nodes().iter() {
+        for node in nodes_to_lint {
             self.early_error_javascript.run(node, &ctx);
             for rule in &self.rules {
                 rule.run(node, &ctx);
