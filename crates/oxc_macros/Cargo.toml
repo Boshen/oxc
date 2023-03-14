@@ -15,7 +15,7 @@ doctest = false
 
 [dependencies]
 syn = "1.0.109"
-quote = "1.0.23"
-proc-macro2 = "1.0.51"
+quote = "1.0.26"
+proc-macro2 = "1.0.52"
 itertools = "0.10.5"
 convert_case = "0.6.0"
