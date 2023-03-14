@@ -1,0 +1,23 @@
+---
+source: crates/oxc_linter/src/tester.rs
+expression: no_async_promise_executor
+---
+
+  ⚠ eslint(no-async-promise-executor): Promise executor functions should not be `async`.
+   ╭─[no_async_promise_executor.tsx:1:1]
+ 1 │ new Promise(async function foo(resolve, reject) {})
+   ·             ─────
+   ╰────
+
+  ⚠ eslint(no-async-promise-executor): Promise executor functions should not be `async`.
+   ╭─[no_async_promise_executor.tsx:1:1]
+ 1 │ new Promise(async (resolve, reject) => {})
+   ·             ─────
+   ╰────
+
+  ⚠ eslint(no-async-promise-executor): Promise executor functions should not be `async`.
+   ╭─[no_async_promise_executor.tsx:1:1]
+ 1 │ new Promise(((((async () => {})))))
+   ·                 ─────
+   ╰────
+

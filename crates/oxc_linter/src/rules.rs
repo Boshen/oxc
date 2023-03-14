@@ -9,6 +9,7 @@ oxc_macros::declare_all_lint_rules! {
     no_debugger,
     no_duplicate_case,
     no_array_constructor,
+    no_async_promise_executor,
     no_caller,
     no_empty,
     no_empty_pattern,
